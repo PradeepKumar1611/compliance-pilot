@@ -1,0 +1,25 @@
+fastapi
+uvicorn[standard]
+python-multipart
+qdrant-client
+llama-index
+llama-index-vector-stores-qdrant
+llama-index-llms-ollama
+llama-index-embeddings-ollama
+fastembed
+docling
+python-docx
+pymupdf
+openpyxl
+langdetect
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt==4.0.1  # pin: passlib 1.7.4 breaks with bcrypt>=4.1 ("password cannot be longer than 72 bytes")
+sqlalchemy
+aiosqlite
+pydantic-settings
+python-dotenv
+httpx
+pytest
+pytest-asyncio
+pytest-cov

@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --obsidian: #0c0b10;
+  --surface: #16151c;
+  --surface2: #1f1d26;
+  --line: #2a2833;
+  --champagne: #cba45a;
+  --champagne-bright: #e6c988;
+  --bronze: #8a6e3b;
+  --ivory: #ede7da;
+  --ivory-dim: #a39c8e;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
+  color: var(--ivory);
+  min-height: 100vh;
+  background-color: var(--obsidian);
+  /* Material depth: a warm champagne vignette over obsidian + a faint grain. */
+  background-image:
+    radial-gradient(1200px 680px at 78% -8%, rgba(203, 164, 90, 0.10), transparent 60%),
+    radial-gradient(900px 600px at -10% 110%, rgba(138, 110, 59, 0.07), transparent 55%);
+  background-attachment: fixed;
+}
+
+/* Fine film grain layer (kept very subtle) */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--obsidian);
+}
+::-webkit-scrollbar-thumb {
+  background: #38343f;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bronze);
+}
+
+@layer base {
+  *:focus-visible {
+    outline: 2px solid var(--champagne);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  /* Page titles render in the display serif for editorial luxury;
+     smaller section headings stay in the grotesque for clean hierarchy. */
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    letter-spacing: -0.01em;
+    font-optical-sizing: auto;
+  }
+}
+
+@layer components {
+  /* Eyebrow / section label */
+  .eyebrow {
+    @apply font-mono text-[0.68rem] uppercase tracking-[0.22em] text-champagne/80;
+  }
+
+  /* Display headings */
+  .display {
+    font-family: 'Fraunces', Georgia, serif;
+    @apply text-ivory tracking-[-0.01em];
+    font-optical-sizing: auto;
+  }
+
+  /* Cards / panels */
+  .lux-card {
+    @apply rounded-md border border-line bg-surface shadow-lux transition-all duration-300;
+  }
+  .lux-card-hover {
+    @apply hover:border-champagne/40 hover:-translate-y-px;
+  }
+
+  /* Hairline divider with a champagne core */
+  .divider-gold {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(203, 164, 90, 0.55), transparent);
+  }
+
+  /* Buttons */
+  .lux-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-line bg-surface2
+           px-4 py-2.5 text-sm font-medium text-ivory transition-all duration-200
+           hover:border-champagne/50 hover:text-champagne-bright
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .lux-btn-gold {
+    @apply inline-flex items-center justify-center gap-2 rounded-md
+           px-4 py-2.5 text-sm font-semibold text-obsidian transition-all duration-200
+           disabled:cursor-not-allowed disabled:opacity-50;
+    background: linear-gradient(180deg, var(--champagne-bright), var(--champagne));
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 10px 30px -12px rgba(203, 164, 90, 0.6);
+  }
+  .lux-btn-gold:hover:not(:disabled) {
+    filter: brightness(1.06);
+  }
+
+  /* Inputs */
+  .lux-input {
+    @apply w-full rounded-md border border-line bg-surface2 px-3.5 py-2.5 text-sm text-ivory
+           placeholder-ivory-dim/60 transition-colors duration-200
+           focus:border-champagne focus:outline-none;
+  }
+
+  /* Pills / chips */
+  .lux-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-surface2
+           px-2.5 py-0.5 font-mono text-[0.7rem] uppercase tracking-wider text-ivory-dim;
+  }
+
+  /* Champagne seal — the signature confidence/status medallion */
+  .lux-seal {
+    @apply relative inline-flex items-center justify-center rounded-full font-display;
+    background: radial-gradient(circle at 30% 25%, rgba(230, 201, 136, 0.18), rgba(22, 21, 28, 0.9));
+    border: 1px solid rgba(203, 164, 90, 0.55);
+    box-shadow: 0 0 0 1px rgba(203, 164, 90, 0.12), 0 6px 20px -10px rgba(203, 164, 90, 0.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  body::before {
+    display: none;
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "compliance-pilot-ui-tests",
+  "private": true,
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  }
+}

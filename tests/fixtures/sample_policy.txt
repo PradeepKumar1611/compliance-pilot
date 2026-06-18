@@ -1,0 +1,29 @@
+ACME Corp Information Security & Compliance Policy
+
+Data Encryption
+All customer data is encrypted at rest using AES-256. Data in transit is
+protected with TLS 1.2 or higher. Encryption keys are managed in a dedicated
+key management service and rotated at least annually.
+
+Access Control and Authentication
+Access to production systems follows the principle of least privilege using
+role-based access control (RBAC). All user accounts require multi-factor
+authentication (MFA). Administrative access is logged and reviewed quarterly.
+
+Data Retention and Deletion
+Customer data is retained only for as long as necessary to provide the service.
+Upon account termination, customer data is deleted within 30 days. Backups are
+retained for 90 days and then permanently destroyed.
+
+Incident Response
+We maintain a documented incident response plan. Security incidents are triaged
+within one hour of detection, and affected customers are notified within 72 hours
+in accordance with applicable regulations.
+
+Business Continuity and Backups
+Backups are performed daily and stored in a geographically separate region.
+Recovery procedures are tested at least twice per year.
+
+Vendor and Subprocessor Management
+All third-party subprocessors are assessed for security and privacy controls
+before onboarding and reviewed annually.

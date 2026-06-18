@@ -1,0 +1,57 @@
+# ---- Python (backend) ----
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+coverage/
+*.egg-info/
+
+# ---- Node (frontend + ui tests) ----
+node_modules/
+dist/
+build/
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ---- Playwright ----
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# ---- Runtime data (never commit) ----
+*.db
+*.sqlite
+*.sqlite3
+qdrant_storage/
+backups/
+uploads/*
+outputs/*
+backend/uploads/*
+backend/outputs/*
+!**/.gitkeep
+
+# ---- Secrets / env ----
+.env
+.env.*
+!.env.example
+
+# ---- Editor / OS ----
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# ---- Claude Code local/session files ----
+.claude/settings.local.json
+.claude/SESSION_CONTEXT.md
+.claude/*.lock
+.claude/scheduled_tasks*

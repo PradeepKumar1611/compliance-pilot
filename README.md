@@ -11,6 +11,10 @@
 ![Qdrant](https://img.shields.io/badge/Qdrant-hybrid%20search-1F1D26)
 ![Tests](https://img.shields.io/badge/tests-97%20backend%20%2B%2044%20UI-6FA98C)
 
+### [◆ Explore the live architecture deck →](https://pradeepkumar1611.github.io/compliance-pilot/architecture.html)
+
+*An interactive walkthrough of the system — architecture, retrieval pipeline, security model, and the UI.*
+
 </div>
 
 ![Dashboard](docs/screenshots/dashboard.png)

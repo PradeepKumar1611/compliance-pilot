@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compliance Pilot — Technical Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Hanken+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --obsidian:#0C0B10;--surface:#16151C;--surface2:#1F1D26;--line:#2A2833;--line2:#3A3744;
+  --champagne:#CBA45A;--champagne-bright:#E6C988;--bronze:#8A6E3B;
+  --ivory:#EDE7DA;--ivory-dim:#A39C8E;--ivory-faint:#6E6A60;
+  --approved:#6FA98C;--approved-bg:rgba(111,169,140,0.14);
+  --review:#D6A95A;--review-bg:rgba(214,169,90,0.14);
+  --flag:#B0584E;--flag-bg:rgba(176,88,78,0.14);
+  --champ-bg:rgba(203,164,90,0.12);
+  --font:'Hanken Grotesk',system-ui,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--obsidian);color:var(--ivory);line-height:1.7;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(1100px 640px at 80% -10%,rgba(203,164,90,0.10),transparent 60%),radial-gradient(820px 560px at -8% 108%,rgba(138,110,59,0.07),transparent 55%);
+  background-attachment:fixed}
+.container{max-width:940px;margin:0 auto;padding:0 24px}
+em{font-style:italic;color:var(--champagne)}
+.serif{font-family:var(--serif)}
+
+/* Nav */
+.nav{position:sticky;top:0;z-index:100;background:rgba(12,11,16,0.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:12px 0}
+.nav-inner{display:flex;align-items:center;gap:22px;overflow-x:auto;font-size:13px}
+.nav a{color:var(--ivory-dim);text-decoration:none;white-space:nowrap;font-weight:500;transition:color .15s}
+.nav a:hover{color:var(--champagne)}
+.nav-brand{font-family:var(--serif);font-size:16px;color:var(--ivory);margin-right:auto;flex-shrink:0;display:flex;align-items:center;gap:10px}
+.monogram{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:7px;border:1px solid rgba(203,164,90,0.5);background:var(--surface2);color:var(--champagne);font-family:var(--serif);font-size:13px}
+
+/* Hero */
+.hero{padding:84px 0 56px;text-align:center;position:relative;overflow:hidden}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:var(--champagne)}
+.hero-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;background:var(--champ-bg);color:var(--champagne);border:1px solid rgba(203,164,90,0.3);margin-bottom:22px;font-family:var(--mono)}
+.hero h1{font-family:var(--serif);font-size:clamp(38px,5.4vw,60px);font-weight:500;line-height:1.08;margin-bottom:18px;letter-spacing:-0.01em}
+.hero-line{height:1px;width:220px;margin:0 auto 24px;background:linear-gradient(90deg,transparent,var(--champagne),transparent)}
+.hero-sub{font-size:18px;color:var(--ivory-dim);max-width:660px;margin:0 auto 34px;line-height:1.6}
+.hero-stats{display:flex;justify-content:center;gap:42px;flex-wrap:wrap}
+.hero-stat-num{font-family:var(--serif);font-size:30px;font-weight:500;color:var(--champagne)}
+.hero-stat-label{font-size:12px;color:var(--ivory-faint);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px}
+
+/* Section */
+.section{padding:60px 0;border-top:1px solid var(--line)}
+.section-num{font-family:var(--mono);font-size:12px;color:var(--champagne);font-weight:500;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px}
+.section h2{font-family:var(--serif);font-size:clamp(27px,3.6vw,38px);font-weight:500;line-height:1.15;margin-bottom:12px;letter-spacing:-0.01em}
+.section-lead{font-size:16px;color:var(--ivory-dim);max-width:700px;line-height:1.7;margin-bottom:32px}
+
+/* Cards */
+.card-grid{display:grid;gap:16px;margin-bottom:8px}
+.card-grid-2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.card-grid-3{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;transition:border-color .25s,transform .25s}
+.card:hover{border-color:rgba(203,164,90,0.4);transform:translateY(-2px)}
+.card h4{font-size:15px;font-weight:600;margin-bottom:6px;color:var(--ivory)}
+.card p{font-size:13.5px;color:var(--ivory-dim);line-height:1.6}
+.card-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:13px;font-weight:700;font-family:var(--serif);background:var(--champ-bg);color:var(--champagne);border:1px solid rgba(203,164,90,0.3)}
+
+/* Diagram */
+.diagram-wrap{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:30px 22px;margin-bottom:14px;overflow-x:auto}
+.diagram-wrap svg{display:block;margin:0 auto;max-width:100%}
+.diagram-caption{font-size:12.5px;color:var(--ivory-faint);text-align:center;margin-top:10px;font-style:italic}
+
+/* Pipeline */
+.pipeline-step{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--champagne);border-radius:0 12px 12px 0;padding:20px;margin-bottom:12px}
+.step-header{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.step-num{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;font-family:var(--serif);background:var(--champ-bg);color:var(--champagne);border:1px solid rgba(203,164,90,0.35)}
+.step-title{font-size:15px;font-weight:600;color:var(--ivory)}
+.step-fn{font-family:var(--mono);font-size:11px;color:var(--ivory-faint);margin-top:2px}
+.step-body{font-size:14px;color:var(--ivory-dim);line-height:1.65;margin-left:44px}
+.step-details{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.step-detail{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+.step-detail-label{font-size:10.5px;font-weight:700;color:var(--ivory-faint);text-transform:uppercase;letter-spacing:0.04em}
+.step-detail-val{font-size:12.5px;color:var(--ivory);margin-top:2px}
+.fp{font-size:11px;padding:3px 10px;border-radius:10px;font-weight:500;font-family:var(--mono)}
+.fp-gold{background:var(--champ-bg);color:var(--champagne)}
+.fp-sage{background:var(--approved-bg);color:var(--approved)}
+.fp-bronze{background:rgba(138,110,59,0.16);color:#C9A86A}
+.fp-mute{background:var(--surface2);color:var(--ivory-dim)}
+
+/* Code */
+.code-block{background:#0A0910;border:1px solid var(--line);border-radius:10px;padding:14px 18px;font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--ivory-dim);overflow-x:auto;margin:12px 0}
+.code-block .key{color:var(--champagne)}
+.code-block .val{color:var(--approved)}
+.code-block .comment{color:var(--ivory-faint)}
+
+/* Product gallery */
+.shot{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);box-shadow:0 24px 60px -28px rgba(0,0,0,0.8);margin-bottom:18px}
+.shot img{display:block;width:100%;height:auto}
+.shot-cap{font-size:12.5px;color:var(--ivory-dim);padding:10px 16px;border-top:1px solid var(--line);background:var(--surface2)}
+.shot-cap b{color:var(--champagne);font-weight:600}
+.gallery-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+
+/* Embeddings */
+.embed-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0}
+.embed-card{border-radius:12px;padding:20px;border:1px solid}
+.embed-card h4{font-size:15px;font-weight:600;margin-bottom:4px}
+.embed-card .sub{font-size:13px;margin-bottom:12px;color:var(--ivory-dim)}
+.vec-row{display:flex;gap:2px;flex-wrap:wrap}
+.dim{width:20px;height:20px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0}
+.embed-detail{font-size:13px;color:var(--ivory-dim);line-height:1.6;margin-top:12px}
+.embed-detail b{color:var(--ivory)}
+.stabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.stab{padding:8px 18px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid var(--line2);background:var(--surface);color:var(--ivory-dim);transition:all .15s;font-family:var(--font);font-weight:500}
+.stab:hover{border-color:rgba(203,164,90,0.5);color:var(--champagne)}
+.stab.active{background:var(--champagne);color:var(--obsidian);border-color:var(--champagne);font-weight:600}
+.scenario-q{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:16px 20px;text-align:center;margin-bottom:20px}
+.scenario-q .label{font-size:11px;color:var(--ivory-faint);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;font-family:var(--mono)}
+.scenario-q .q{font-family:var(--serif);font-size:18px;color:var(--ivory)}
+.result-col h5{font-size:13px;font-weight:700;margin-bottom:8px}
+.doc-card{border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--surface)}
+.doc-card .rank{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;font-family:var(--serif)}
+.doc-card .name{font-size:12px;font-weight:600;color:var(--ivory)}
+.doc-card .why{font-size:11px;color:var(--ivory-dim)}
+.doc-miss{opacity:.4}
+.fused-label{text-align:center;font-size:12px;font-weight:600;color:var(--champagne);padding:10px 0;text-transform:uppercase;letter-spacing:0.06em;font-family:var(--mono)}
+.punchline-box{background:var(--champ-bg);border:1px solid rgba(203,164,90,0.3);border-radius:12px;padding:18px;text-align:center;margin-top:16px}
+.punchline-box h4{font-size:15px;font-weight:600;color:var(--champagne-bright);margin-bottom:4px}
+.punchline-box p{font-size:13px;color:var(--ivory-dim)}
+
+/* Quality bars */
+.qbar{display:grid;grid-template-columns:1.4fr 1fr 48px;gap:10px;align-items:center;padding:7px 0}
+.qbar-name{font-size:12.5px;color:var(--ivory-dim)}
+.qbar-track{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.qbar-fill{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--bronze),var(--champagne))}
+.qbar-val{font-size:12px;font-weight:700;text-align:right;color:var(--champagne)}
+
+/* Tiers */
+.tier-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:8px}
+.tier{border-radius:12px;padding:18px;border:1px solid}
+.tier .t-name{font-family:var(--serif);font-size:17px;margin-bottom:4px}
+.tier .t-rule{font-family:var(--mono);font-size:11px;color:var(--ivory-faint);margin-bottom:8px}
+.tier .t-desc{font-size:13px;color:var(--ivory-dim);line-height:1.55}
+
+/* Formats table */
+.fmt-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.fmt-table th{font-size:10.5px;font-weight:700;color:var(--ivory-faint);text-transform:uppercase;letter-spacing:0.05em;padding:8px 12px;text-align:left;border-bottom:2px solid var(--line2)}
+.fmt-table td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.fmt-table tr:last-child td{border-bottom:none}
+.fmt-arrow{color:var(--ivory-faint);text-align:center}
+
+/* Stack table */
+.stack{width:100%;border-collapse:collapse;font-size:14px}
+.stack td{padding:11px 4px;border-bottom:1px solid var(--line)}
+.stack tr:last-child td{border-bottom:none}
+.stack td:first-child{color:var(--ivory-faint);width:160px;font-size:12px;text-transform:uppercase;letter-spacing:0.04em;font-family:var(--mono)}
+.stack td:last-child{color:var(--ivory)}
+
+/* Advantage */
+.advantage{background:linear-gradient(135deg,rgba(203,164,90,0.14),rgba(111,169,140,0.10));border:1px solid rgba(203,164,90,0.3);border-radius:16px;padding:30px;text-align:center;margin:30px 0 8px}
+.advantage h3{font-family:var(--serif);font-size:26px;color:var(--champagne-bright);margin-bottom:8px}
+.advantage p{font-size:15px;color:var(--ivory-dim)}
+
+/* Footer */
+.footer{padding:44px 0;text-align:center;border-top:1px solid var(--line);color:var(--ivory-faint);font-size:13px}
+.footer a{color:var(--champagne);text-decoration:none}
+
+@media(max-width:640px){
+  .embed-grid,.step-details,.card-grid-2{grid-template-columns:1fr}
+  .hero-stats{gap:24px}
+  .container{padding:0 16px}
+  .scn-cols{grid-template-columns:1fr !important}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+<div class="container nav-inner">
+  <span class="nav-brand"><span class="monogram">CP</span> Compliance Pilot</span>
+  <a href="#architecture">Architecture</a>
+  <a href="#product">Product</a>
+  <a href="#kb">KB pipeline</a>
+  <a href="#embeddings">Retrieval</a>
+  <a href="#security">Security</a>
+  <a href="#stack">Stack</a>
+</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+<div class="container">
+  <div class="hero-badge">Self-hosted compliance automation</div>
+  <h1>Compliance Pilot</h1>
+  <div class="hero-line"></div>
+  <p class="hero-sub">Upload your policy library. Upload any security questionnaire. Get it back filled with accurate, cited answers — in the original format, in minutes. Every response <em>sourced, scored, and sealed</em>.</p>
+  <div class="hero-stats">
+    <div><div class="hero-stat-num">100%</div><div class="hero-stat-label">Runs on your own infra</div></div>
+    <div><div class="hero-stat-num">Hybrid</div><div class="hero-stat-label">Dense + sparse retrieval</div></div>
+    <div><div class="hero-stat-num">3</div><div class="hero-stat-label">Confidence tiers</div></div>
+    <div><div class="hero-stat-num">141</div><div class="hero-stat-label">Automated tests</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 01 ARCHITECTURE -->
+<section class="section" id="architecture">
+<div class="container">
+  <div class="section-num">01 — System architecture</div>
+  <h2>How it all <em>connects</em></h2>
+  <p class="section-lead">A React SPA over an async FastAPI core, backed by a Qdrant vector store and your choice of local LLM — the Claude Code CLI (default) or Ollama. Embeddings run on a local Ollama instance. Everything runs on your own infrastructure; no questionnaire data leaves the network.</p>
+
+  <div class="diagram-wrap">
+    <svg width="100%" viewBox="0 0 680 540" font-family="Hanken Grotesk">
+    <defs><marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+    <rect x="250" y="18" width="180" height="40" rx="8" fill="#1F1D26" stroke="#3A3744"/>
+    <text x="340" y="38" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#EDE7DA">User browser</text>
+    <line x1="340" y1="58" x2="340" y2="86" stroke="#3A3744" stroke-width="1.5" marker-end="url(#a1)"/>
+    <rect x="210" y="86" width="260" height="52" rx="8" fill="#16151C" stroke="rgba(203,164,90,0.45)"/>
+    <text x="340" y="104" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#E6C988">React 18 SPA</text>
+    <text x="340" y="122" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#A39C8E">Vite · Tailwind · cookie auth · :5173</text>
+    <line x1="340" y1="138" x2="340" y2="168" stroke="#3A3744" stroke-width="1.5" marker-end="url(#a1)"/>
+    <text x="352" y="156" font-size="10" fill="#6E6A60">/api proxy · SSE</text>
+    <rect x="178" y="168" width="324" height="74" rx="10" fill="#16151C" stroke="rgba(203,164,90,0.55)"/>
+    <text x="340" y="192" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="600" fill="#CBA45A">FastAPI core (async)</text>
+    <text x="340" y="210" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#A39C8E">Auth · Ingest · Retrieve · Fill · Audit</text>
+    <text x="340" y="228" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#8A6E3B" font-family="IBM Plex Mono">:9000</text>
+    <path d="M255 242 L255 268 L130 268 L130 294" fill="none" stroke="#6FA98C" stroke-width="1.5" marker-end="url(#a1)"/>
+    <path d="M425 242 L425 268 L555 268 L555 294" fill="none" stroke="#8A6E3B" stroke-width="1.5" marker-end="url(#a1)"/>
+    <!-- AI column -->
+    <rect x="50" y="294" width="160" height="50" rx="8" fill="#16151C" stroke="rgba(111,169,140,0.5)"/>
+    <text x="130" y="312" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#8FC3AC">Claude Code CLI</text>
+    <text x="130" y="330" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#A39C8E">Default LLM · answers</text>
+    <rect x="50" y="360" width="160" height="50" rx="8" fill="#16151C" stroke="rgba(111,169,140,0.5)"/>
+    <text x="130" y="378" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#8FC3AC">Ollama (local)</text>
+    <text x="130" y="396" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#A39C8E">qwen3-embedding:8b · :11434</text>
+    <rect x="50" y="426" width="160" height="46" rx="8" fill="#16151C" stroke="rgba(111,169,140,0.35)" stroke-dasharray="4 3"/>
+    <text x="130" y="442" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#8FC3AC">Optional GPU host</text>
+    <text x="130" y="458" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#A39C8E">remote embeddings</text>
+    <line x1="130" y1="344" x2="130" y2="360" stroke="rgba(111,169,140,0.4)" stroke-width="1.5" marker-end="url(#a1)"/>
+    <line x1="130" y1="410" x2="130" y2="426" stroke="rgba(111,169,140,0.3)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#a1)"/>
+    <!-- Storage column -->
+    <rect x="470" y="294" width="160" height="50" rx="8" fill="#16151C" stroke="rgba(138,110,59,0.55)"/>
+    <text x="550" y="312" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#C9A86A">Qdrant</text>
+    <text x="550" y="330" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#A39C8E">Vectors · hybrid · :6333</text>
+    <rect x="470" y="360" width="160" height="50" rx="8" fill="#16151C" stroke="rgba(138,110,59,0.55)"/>
+    <text x="550" y="378" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#C9A86A">SQLite</text>
+    <text x="550" y="396" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#A39C8E">Users · jobs · audit</text>
+    <rect x="470" y="426" width="160" height="46" rx="8" fill="#16151C" stroke="rgba(138,110,59,0.55)"/>
+    <text x="550" y="442" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#C9A86A">File system</text>
+    <text x="550" y="458" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#A39C8E">Uploads · outputs</text>
+    <line x1="550" y1="344" x2="550" y2="360" stroke="rgba(138,110,59,0.45)" stroke-width="1.5" marker-end="url(#a1)"/>
+    <line x1="550" y1="410" x2="550" y2="426" stroke="rgba(138,110,59,0.45)" stroke-width="1.5" marker-end="url(#a1)"/>
+    <!-- legend -->
+    <rect x="210" y="500" width="11" height="11" rx="2" fill="none" stroke="rgba(203,164,90,0.6)"/><text x="227" y="510" font-size="11" fill="#6E6A60">Application</text>
+    <rect x="320" y="500" width="11" height="11" rx="2" fill="none" stroke="rgba(111,169,140,0.6)"/><text x="337" y="510" font-size="11" fill="#6E6A60">AI / ML</text>
+    <rect x="400" y="500" width="11" height="11" rx="2" fill="none" stroke="rgba(138,110,59,0.6)"/><text x="417" y="510" font-size="11" fill="#6E6A60">Storage</text>
+    </svg>
+  </div>
+  <p class="diagram-caption">Single-node by default; the embedding host can be split onto a GPU box for throughput.</p>
+
+  <div class="card-grid card-grid-3" style="margin-top:22px">
+    <div class="card"><div class="card-icon">7</div><h4>Product surfaces</h4><p>Dashboard · Knowledge Base · Process · Chat · Audit · URL Validator · Settings</p></div>
+    <div class="card"><div class="card-icon">🔐</div><h4>Cookie auth</h4><p>httpOnly access + refresh tokens, CSRF double-submit, role-based access</p></div>
+    <div class="card"><div class="card-icon">141</div><h4>Tested</h4><p>97 pytest (mocked) + 44 Playwright end-to-end, all green</p></div>
+  </div>
+</div>
+</section>
+
+<!-- 02 PRODUCT -->
+<section class="section" id="product">
+<div class="container">
+  <div class="section-num">02 — The product</div>
+  <h2>An interface built to feel <em>trusted</em></h2>
+  <p class="section-lead">A deliberate "Obsidian &amp; Champagne" identity — Fraunces display serif, warm near-black, and a single champagne accent. Confidence is rendered as a seal; the whole app is responsive down to mobile.</p>
+
+  <div class="shot"><img src="screenshots/login.png" alt="Login"><div class="shot-cap"><b>Sign in.</b> A split obsidian hero with the serif wordmark and a gold hairline.</div></div>
+
+  <div class="gallery-2">
+    <div class="shot"><img src="screenshots/dashboard.png" alt="Dashboard"><div class="shot-cap"><b>Dashboard.</b> KB health, confidence distribution, recent activity.</div></div>
+    <div class="shot"><img src="screenshots/chat.png" alt="Chat"><div class="shot-cap"><b>Chat.</b> Sourced, confidence-scored answers from the KB.</div></div>
+    <div class="shot"><img src="screenshots/process.png" alt="Process questionnaire"><div class="shot-cap"><b>Process.</b> Drop a questionnaire; watch it fill live via SSE.</div></div>
+    <div class="shot"><img src="screenshots/audit.png" alt="Audit log"><div class="shot-cap"><b>Audit.</b> Every answer logged with confidence, source, and time.</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 03 KB PIPELINE -->
+<section class="section" id="kb">
+<div class="container">
+  <div class="section-num">03 — Knowledge base creation</div>
+  <h2>From documents to <em>searchable knowledge</em></h2>
+  <p class="section-lead">Policy documents flow through a five-step pipeline: parse, normalize to markdown, chunk by section, generate dual embeddings (dense + sparse), and store in a versioned Qdrant collection.</p>
+
+  <div class="pipeline-step">
+    <div class="step-header"><div class="step-num">1</div><div><div class="step-title">Parse — extract clean text</div><div class="step-fn">ingest.py · _parse_to_text()</div></div></div>
+    <div class="step-body">Lightweight formats take a fast direct path; rich formats use IBM Docling (AI layout) with library fallbacks.
+      <div class="step-details">
+        <div class="step-detail"><div class="step-detail-label">Fast path (no docling)</div><div style="margin-top:5px;display:flex;gap:5px;flex-wrap:wrap"><span class="fp fp-sage">TXT</span><span class="fp fp-sage">MD</span><span class="fp fp-sage">JSON</span><span class="fp fp-sage">HTML</span><span class="fp fp-sage">CSV</span></div></div>
+        <div class="step-detail"><div class="step-detail-label">Docling + fallback</div><div style="margin-top:5px;display:flex;gap:5px;flex-wrap:wrap"><span class="fp fp-gold">PDF→PyMuPDF</span><span class="fp fp-gold">DOCX→python-docx</span><span class="fp fp-gold">XLSX→openpyxl</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pipeline-step">
+    <div class="step-header"><div class="step-num">2</div><div><div class="step-title">Normalize to markdown</div><div class="step-fn">pure Python · deterministic</div></div></div>
+    <div class="step-body">Strips markup, normalizes whitespace, derives a title when absent. No LLM, no content loss — fast and repeatable.</div>
+  </div>
+
+  <div class="pipeline-step">
+    <div class="step-header"><div class="step-num">3</div><div><div class="step-title">Smart chunking by section</div><div class="step-fn">ingest.py · chunk_document()</div></div></div>
+    <div class="step-body">Splits on headings first, then paragraphs/sentences/words if a chunk runs long — structure-aware, not blind.
+      <div class="step-details">
+        <div class="step-detail"><div class="step-detail-label">Max chunk</div><div class="step-detail-val">1000 chars (configurable)</div></div>
+        <div class="step-detail"><div class="step-detail-label">Overlap</div><div class="step-detail-val">150 chars carried forward</div></div>
+        <div class="step-detail"><div class="step-detail-label">Metadata</div><div class="step-detail-val">source_file · section · page · index</div></div>
+        <div class="step-detail"><div class="step-detail-label">Q&amp;A aware</div><div class="step-detail-val">prior approved answers re-ingested</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pipeline-step">
+    <div class="step-header"><div class="step-num">4</div><div><div class="step-title">Dual embedding — dense + sparse</div><div class="step-fn">ingest.py · _embed_and_store_chunks()</div></div></div>
+    <div class="step-body">Each chunk is embedded twice and stored with a section context prefix for sharper similarity.
+      <div class="step-details">
+        <div class="step-detail" style="border-color:rgba(111,169,140,0.4)"><div class="step-detail-label" style="color:var(--approved)">Dense</div><div class="step-detail-val">qwen3-embedding:8b · 4096 dims · cosine</div></div>
+        <div class="step-detail" style="border-color:rgba(138,110,59,0.45)"><div class="step-detail-label" style="color:#C9A86A">Sparse</div><div class="step-detail-val">BM42 via FastEmbed · keyword + TF-IDF</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pipeline-step">
+    <div class="step-header"><div class="step-num">5</div><div><div class="step-title">Store in a versioned collection</div><div class="step-fn">collection: policy_v{version}</div></div></div>
+    <div class="step-body">Each KB version is its own Qdrant collection — ingest a new version without disturbing the active one.
+      <div class="code-block"><span class="key">PointStruct</span> {
+  vector: { dense: [4096 floats], sparse: {indices, values} },
+  payload: {
+    text: <span class="val">"chunk content"</span>,
+    source_file: <span class="val">"data-retention.txt"</span>,
+    source_url: <span class="val">"https://help.example.com/kb/…"</span>,
+    section_title: <span class="val">"Data Retention"</span>, page_number, chunk_index
+  }
+}</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- 04 EMBEDDINGS / RETRIEVAL -->
+<section class="section" id="embeddings">
+<div class="container">
+  <div class="section-num">04 — Retrieval</div>
+  <h2>Why we search <em>two ways at once</em></h2>
+  <p class="section-lead">Dense vectors capture meaning — "protect stored information" ≈ "data at rest encryption." Sparse vectors capture exact terms — "SOC 2 Type II." Compliance needs both, fused by reciprocal rank fusion.</p>
+
+  <div class="embed-grid">
+    <div class="embed-card" style="background:var(--approved-bg);border-color:rgba(111,169,140,0.4)">
+      <h4 style="color:var(--approved)">Dense embedding</h4>
+      <div class="sub">Captures meaning — every dimension encodes a concept</div>
+      <div class="vec-row" id="dense-vec"></div>
+      <div class="embed-detail"><b style="color:var(--approved)">4096 dimensions</b> of learned concepts, via <b>qwen3-embedding:8b</b>.</div>
+    </div>
+    <div class="embed-card" style="background:rgba(138,110,59,0.12);border-color:rgba(138,110,59,0.4)">
+      <h4 style="color:#C9A86A">Sparse embedding</h4>
+      <div class="sub">Captures keywords — only matching terms light up</div>
+      <div class="vec-row" id="sparse-vec"></div>
+      <div class="embed-detail"><b style="color:#C9A86A">Vocabulary-sized</b>, mostly zeros — exact terms via <b>BM42</b>.</div>
+    </div>
+  </div>
+
+  <h3 class="serif" style="font-size:19px;margin:30px 0 12px;color:var(--ivory)">See it in action — pick a compliance question</h3>
+  <div class="stabs" id="scenario-tabs"></div>
+  <div class="scenario-q"><div class="label">Compliance question</div><div class="q" id="sq-display"></div></div>
+  <div class="scn-cols" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="result-col"><h5 style="color:var(--approved)">Dense finds (by meaning)</h5><div id="s-dense"></div></div>
+    <div class="result-col"><h5 style="color:#C9A86A">Sparse finds (by keywords)</h5><div id="s-sparse"></div></div>
+  </div>
+  <div class="fused-label">↓ Reciprocal rank fusion merges both ↓</div>
+  <div><h5 style="text-align:center;font-size:13px;font-weight:700;color:var(--champagne);margin-bottom:8px">Combined result — best of both</h5><div id="s-fused"></div></div>
+  <div class="punchline-box"><h4 id="s-punch-t"></h4><p id="s-punch-s"></p></div>
+
+  <h3 class="serif" style="font-size:19px;margin:34px 0 14px;color:var(--ivory)">The full query pipeline</h3>
+  <div class="diagram-wrap">
+    <svg width="100%" viewBox="0 0 680 590" font-family="Hanken Grotesk">
+    <defs><marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+    <rect x="230" y="10" width="220" height="38" rx="8" fill="#1F1D26" stroke="#3A3744"/><text x="340" y="29" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#EDE7DA">Incoming question</text>
+    <line x1="340" y1="48" x2="340" y2="68" stroke="#3A3744" stroke-width="1.5" marker-end="url(#a2)"/>
+    <rect x="220" y="68" width="240" height="44" rx="8" fill="#16151C" stroke="rgba(176,88,78,0.45)"/><text x="340" y="84" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#D98C82">Detect language</text><text x="340" y="100" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#A39C8E">translate to EN if needed</text>
+    <line x1="340" y1="112" x2="340" y2="132" stroke="#3A3744" stroke-width="1.5" marker-end="url(#a2)"/>
+    <rect x="190" y="132" width="300" height="44" rx="8" fill="#16151C" stroke="rgba(203,164,90,0.5)"/><text x="340" y="148" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#CBA45A">Query expansion (LLM)</text><text x="340" y="164" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#A39C8E">3 reformulations + original</text>
+    <line x1="270" y1="176" x2="180" y2="204" stroke="#3A3744" stroke-width="1.5" marker-end="url(#a2)"/><line x1="410" y1="176" x2="500" y2="204" stroke="#3A3744" stroke-width="1.5" marker-end="url(#a2)"/>
+    <rect x="60" y="204" width="220" height="44" rx="8" fill="#16151C" stroke="rgba(111,169,140,0.45)"/><text x="170" y="220" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#8FC3AC">Dense search</text><text x="170" y="236" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#A39C8E">qwen3-embedding:8b · 4096d</text>
+    <rect x="400" y="204" width="220" height="44" rx="8" fill="#16151C" stroke="rgba(138,110,59,0.5)"/><text x="510" y="220" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#C9A86A">Sparse search</text><text x="510" y="236" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#A39C8E">BM42 keyword matching</text>
+    <line x1="170" y1="248" x2="270" y2="280" stroke="#3A3744" stroke-width="1.5" marker-end="url(#a2)"/><line x1="510" y1="248" x2="410" y2="280" stroke="#3A3744" stroke-width="1.5" marker-end="url(#a2)"/>
+    <rect x="210" y="280" width="260" height="44" rx="8" fill="#16151C" stroke="rgba(203,164,90,0.5)"/><text x="340" y="296" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#CBA45A">Reciprocal rank fusion</text><text x="340" y="312" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#A39C8E">merge + dedupe</text>
+    <line x1="340" y1="324" x2="340" y2="344" stroke="#3A3744" stroke-width="1.5" marker-end="url(#a2)"/>
+    <rect x="210" y="344" width="260" height="44" rx="8" fill="#16151C" stroke="rgba(203,164,90,0.5)"/><text x="340" y="360" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#CBA45A">LLM re-ranking</text><text x="340" y="376" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#A39C8E">over-fetch → top max_chunks</text>
+    <line x1="340" y1="388" x2="340" y2="408" stroke="#3A3744" stroke-width="1.5" marker-end="url(#a2)"/>
+    <rect x="190" y="408" width="300" height="44" rx="8" fill="#16151C" stroke="rgba(111,169,140,0.45)"/><text x="340" y="424" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#8FC3AC">Answer generation</text><text x="340" y="440" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#A39C8E">Claude Code · soft-retry fallback</text>
+    <line x1="340" y1="452" x2="340" y2="472" stroke="#3A3744" stroke-width="1.5" marker-end="url(#a2)"/>
+    <rect x="190" y="472" width="300" height="44" rx="8" fill="#16151C" stroke="rgba(214,169,90,0.5)"/><text x="340" y="488" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#D6A95A">Confidence scoring</text><text x="340" y="504" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#A39C8E">0.6·top + 0.4·avg → 3 tiers</text>
+    <line x1="250" y1="516" x2="160" y2="548" stroke="#3A3744" stroke-width="1.5" marker-end="url(#a2)"/><line x1="340" y1="516" x2="340" y2="548" stroke="#3A3744" stroke-width="1.5" marker-end="url(#a2)"/><line x1="430" y1="516" x2="520" y2="548" stroke="#3A3744" stroke-width="1.5" marker-end="url(#a2)"/>
+    <rect x="70" y="548" width="170" height="32" rx="8" fill="rgba(111,169,140,0.14)" stroke="rgba(111,169,140,0.5)"/><text x="155" y="564" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="700" fill="#8FC3AC">Auto-fill</text>
+    <rect x="255" y="548" width="170" height="32" rx="8" fill="rgba(214,169,90,0.14)" stroke="rgba(214,169,90,0.5)"/><text x="340" y="564" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="700" fill="#D6A95A">Needs review</text>
+    <rect x="440" y="548" width="170" height="32" rx="8" fill="rgba(176,88,78,0.14)" stroke="rgba(176,88,78,0.5)"/><text x="525" y="564" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="700" fill="#D98C82">No answer</text>
+    </svg>
+  </div>
+
+  <div class="tier-grid">
+    <div class="tier" style="background:var(--approved-bg);border-color:rgba(111,169,140,0.4)"><div class="t-name" style="color:var(--approved)">Auto-fill</div><div class="t-rule">score ≥ 0.82</div><div class="t-desc">Filled with the answer plus a source citation.</div></div>
+    <div class="tier" style="background:var(--review-bg);border-color:rgba(214,169,90,0.4)"><div class="t-name" style="color:var(--review)">Needs review</div><div class="t-rule">0.65 – 0.82</div><div class="t-desc">Filled, flagged for a human to confirm.</div></div>
+    <div class="tier" style="background:var(--flag-bg);border-color:rgba(176,88,78,0.4)"><div class="t-name" style="color:#D98C82">No answer</div><div class="t-rule">&lt; 0.65</div><div class="t-desc">Left blank with a "human review required" marker.</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 05 SECURITY -->
+<section class="section" id="security">
+<div class="container">
+  <div class="section-num">05 — Security &amp; reliability</div>
+  <h2>Hardened for the <em>real world</em></h2>
+  <p class="section-lead">Compliance tooling has to be trustworthy itself. Auth, input handling, and background work were all built to survive restarts, multiple workers, and hostile input.</p>
+  <div class="card-grid card-grid-2">
+    <div class="card"><h4 style="color:var(--champagne)">Cookie-based auth + CSRF</h4><p>httpOnly access &amp; refresh tokens (no token in localStorage), double-submit CSRF on mutations, silent refresh, role-based access.</p></div>
+    <div class="card"><h4 style="color:var(--champagne)">SSRF-guarded settings</h4><p>Admin-settable Ollama/embed URLs must resolve to loopback/private hosts; numeric ranges validated server-side.</p></div>
+    <div class="card"><h4 style="color:var(--champagne)">Path-traversal &amp; upload safety</h4><p>Filenames sanitized to basenames, zip-slip guarded, backup restore confined to its directory, upload size capped.</p></div>
+    <div class="card"><h4 style="color:var(--champagne)">Brute-force resistance</h4><p>Login rate-limited per user + IP; a strong <code style="font-family:var(--mono);font-size:11px;color:var(--champagne-bright)">JWT_SECRET</code> is enforced in production.</p></div>
+    <div class="card"><h4 style="color:var(--champagne)">Durable background jobs</h4><p>Job cancellation &amp; the ingestion lock live in the DB — they survive restarts and stay correct across workers. Per-question writes are atomic.</p></div>
+    <div class="card"><h4 style="color:var(--champagne)">Live progress via SSE</h4><p>Questionnaire processing streams status over Server-Sent Events (with graceful polling fallback) — no hammering the API.</p></div>
+  </div>
+</div>
+</section>
+
+<!-- 06 WHY BETTER -->
+<section class="section">
+<div class="container">
+  <div class="section-num">06 — Why the answers are better</div>
+  <h2>Purpose-built for <em>compliance</em>, not generic chat</h2>
+  <p class="section-lead">Each retrieval feature compounds. Versus a vanilla "dense-only, single-query" RAG setup, the stack meaningfully lifts answer quality on keyword-critical compliance questions.</p>
+  <div style="background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px" id="quality-bars"></div>
+  <div class="advantage"><h3>Sourced · Scored · Sealed</h3><p>Hybrid search + query expansion + re-ranking + a compliance-specific prompt + confidence tiers — together they move answers from "plausible" to "defensible."</p></div>
+</div>
+</section>
+
+<!-- 07 FORMATS + STACK -->
+<section class="section" id="stack">
+<div class="container">
+  <div class="section-num">07 — Formats &amp; stack</div>
+  <h2>Read anything, write back the <em>original</em></h2>
+  <p class="section-lead">Answers are written back into the source document — not dumped as text. PDFs are returned as editable DOCX.</p>
+  <div style="overflow-x:auto;margin-bottom:30px">
+  <table class="fmt-table">
+    <thead><tr><th>Input</th><th>Read</th><th></th><th>Write</th><th></th><th>Output</th></tr></thead>
+    <tbody>
+      <tr><td><span class="fp fp-gold">DOCX</span></td><td>Docling</td><td class="fmt-arrow">→</td><td>python-docx</td><td class="fmt-arrow">→</td><td><span class="fp fp-gold">DOCX</span></td></tr>
+      <tr><td><span class="fp fp-gold">XLSX</span></td><td>Docling</td><td class="fmt-arrow">→</td><td>openpyxl</td><td class="fmt-arrow">→</td><td><span class="fp fp-gold">XLSX</span></td></tr>
+      <tr><td><span class="fp fp-bronze">PDF</span></td><td>Docling + PyMuPDF</td><td class="fmt-arrow">→</td><td>python-docx</td><td class="fmt-arrow">→</td><td><span class="fp fp-gold">DOCX</span></td></tr>
+      <tr><td><span class="fp fp-sage">JSON</span></td><td>Fuzzy-key parser</td><td class="fmt-arrow">→</td><td>JSON writer</td><td class="fmt-arrow">→</td><td><span class="fp fp-sage">JSON</span></td></tr>
+      <tr><td><span class="fp fp-mute">TXT / CSV / MD</span></td><td>Direct read</td><td class="fmt-arrow">→</td><td>Text writer</td><td class="fmt-arrow">→</td><td><span class="fp fp-mute">TXT</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <table class="stack">
+    <tr><td>Backend</td><td>Python 3.11 · FastAPI (async) · SQLAlchemy + aiosqlite</td></tr>
+    <tr><td>Vector DB</td><td>Qdrant — dense + sparse hybrid, RRF fusion</td></tr>
+    <tr><td>Embeddings</td><td>Ollama qwen3-embedding:8b (dense) · FastEmbed BM42 (sparse)</td></tr>
+    <tr><td>LLM</td><td>Claude Code CLI (default) or Ollama</td></tr>
+    <tr><td>Doc parsing</td><td>IBM Docling · python-docx · PyMuPDF · openpyxl</td></tr>
+    <tr><td>Frontend</td><td>React 18 · Vite · Tailwind · Radix UI · i18next</td></tr>
+    <tr><td>Auth</td><td>JWT in httpOnly cookies + CSRF · bcrypt</td></tr>
+    <tr><td>Tests</td><td>pytest (97) · Playwright (44, end-to-end)</td></tr>
+  </table>
+</div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <span class="serif" style="color:var(--ivory);font-size:15px">Compliance Pilot</span> — self-hosted compliance questionnaire automation<br>
+    MIT licensed · <a href="https://github.com/PradeepKumar1611/compliance-pilot">github.com/PradeepKumar1611/compliance-pilot</a>
+  </div>
+</footer>
+
+<script>
+// dense / sparse vector viz
+(function(){
+  var dv=document.getElementById('dense-vec'),sv=document.getElementById('sparse-vec');
+  for(var i=0;i<28;i++){var v=(Math.random()*2-1).toFixed(1),a=Math.abs(parseFloat(v));
+    dv.innerHTML+='<div class="dim" style="background:rgba(111,169,140,'+(0.18+a*0.6).toFixed(2)+');color:#0C0B10">'+v+'</div>';}
+  dv.innerHTML+='<div class="dim" style="background:transparent;color:#6E6A60;width:auto;font-size:9px">…4068 more</div>';
+  var kw=['','','','encrypt','','','','data','','','','','rest','','','','','','','','','','','','','','',''];
+  for(var i=0;i<28;i++){if(kw[i]){var w=(0.4+Math.random()*0.6).toFixed(1);sv.innerHTML+='<div class="dim" style="background:rgba(203,164,90,'+(0.3+parseFloat(w)*0.5).toFixed(2)+');color:#0C0B10">'+w+'</div>';}
+    else sv.innerHTML+='<div class="dim" style="background:#1F1D26;color:#3A3744">0</div>';}
+  sv.innerHTML+='<div class="dim" style="background:transparent;color:#6E6A60;width:auto;font-size:9px">…mostly zeros</div>';
+})();
+// scenario interactive
+(function(){
+  var scenarios=[
+    {label:'SOC 2 audit',q:'"What is your SOC 2 Type II certification status?"',
+     dense:[{n:'Security compliance policy',w:'semantically close to "certification"',h:1},{n:'Annual audit procedures',w:'audit concept matches',h:1},{n:'Data protection overview',w:'related topic',h:0}],
+     sparse:[{n:'SOC 2 Type II report',w:'exact: "SOC 2 Type II"',h:1},{n:'SOC 2 scope document',w:'exact: "SOC 2"',h:1},{n:'ISO 27001 certificate',w:'no keyword overlap',h:0}],
+     fused:[{n:'SOC 2 Type II report',w:'rank 1 sparse + related dense',r:1},{n:'Security compliance policy',w:'rank 1 dense + "SOC"',r:2},{n:'SOC 2 scope document',w:'strong keyword match',r:3}],
+     pt:'Dense alone missed the exact SOC 2 document',ps:'Sparse caught it by keyword. Together, the right document rises to rank 1.'},
+    {label:'Encryption',q:'"Do you protect stored information with cryptographic controls?"',
+     dense:[{n:'Data-at-rest encryption policy',w:'"protect stored" ≈ "data at rest"',h:1},{n:'AES-256 implementation guide',w:'"cryptographic" ≈ "AES-256"',h:1},{n:'Key management procedure',w:'related crypto concept',h:1}],
+     sparse:[{n:'Cryptographic standards doc',w:'exact: "cryptographic"',h:1},{n:'Information classification policy',w:'exact: "information"',h:0},{n:'Data-at-rest encryption policy',w:'no overlap — different words!',h:0}],
+     fused:[{n:'Data-at-rest encryption policy',w:'rank 1 dense + partial sparse',r:1},{n:'AES-256 implementation guide',w:'strong semantic',r:2},{n:'Cryptographic standards doc',w:'keyword hit',r:3}],
+     pt:'Sparse alone missed the best document entirely',ps:'The question said "protect stored" but the doc says "data at rest" — only dense understood they mean the same.'},
+    {label:'GDPR',q:'"Describe your GDPR Article 17 right-to-erasure process"',
+     dense:[{n:'Data deletion procedures',w:'"right to erasure" ≈ "deletion"',h:1},{n:'User privacy rights guide',w:'related privacy concept',h:1},{n:'Data retention schedule',w:'tangential',h:0}],
+     sparse:[{n:'GDPR compliance checklist',w:'exact: "GDPR"',h:1},{n:'Article 17 implementation',w:'exact: "Article 17" + "erasure"',h:1},{n:'EU data regulation FAQ',w:'no exact overlap',h:0}],
+     fused:[{n:'Article 17 implementation',w:'keyword + semantic match',r:1},{n:'Data deletion procedures',w:'"erasure ≈ deletion"',r:2},{n:'GDPR compliance checklist',w:'"GDPR" keyword',r:3}],
+     pt:'Neither alone ranked the best document first',ps:'Dense understood "erasure = deletion"; sparse caught "Article 17" exactly. Fusion ranked the ideal doc first.'}
+  ];
+  var tabs=document.getElementById('scenario-tabs');
+  function dc(d,i,bg,bd,rb,rc){return '<div class="doc-card '+(d.h?'':'doc-miss')+'" style="background:'+(d.h?bg:'var(--surface)')+';border-color:'+(d.h?bd:'var(--line)')+'"><div class="rank" style="background:'+(d.h?rb:'var(--surface2)')+';color:'+(d.h?rc:'var(--ivory-faint)')+'">'+(i+1)+'</div><div><div class="name">'+d.n+'</div><div class="why">'+d.w+'</div></div></div>';}
+  function render(idx){
+    var s=scenarios[idx];
+    document.querySelectorAll('.stab').forEach(function(t,i){t.classList.toggle('active',i===idx)});
+    document.getElementById('sq-display').textContent=s.q;
+    var dr=document.getElementById('s-dense'),sr=document.getElementById('s-sparse'),fr=document.getElementById('s-fused');
+    dr.innerHTML='';sr.innerHTML='';fr.innerHTML='';
+    s.dense.forEach(function(d,i){dr.innerHTML+=dc(d,i,'var(--approved-bg)','rgba(111,169,140,0.4)','#6FA98C','#0C0B10');});
+    s.sparse.forEach(function(d,i){sr.innerHTML+=dc(d,i,'rgba(138,110,59,0.16)','rgba(138,110,59,0.45)','#C9A86A','#0C0B10');});
+    s.fused.forEach(function(d){fr.innerHTML+='<div class="doc-card" style="background:var(--champ-bg);border-color:rgba(203,164,90,0.4)"><div class="rank" style="background:#CBA45A;color:#0C0B10">'+d.r+'</div><div><div class="name">'+d.n+'</div><div class="why">'+d.w+'</div></div></div>';});
+    document.getElementById('s-punch-t').textContent=s.pt;
+    document.getElementById('s-punch-s').textContent=s.ps;
+  }
+  scenarios.forEach(function(s,i){var b=document.createElement('button');b.className='stab';b.textContent=s.label;b.onclick=function(){render(i)};tabs.appendChild(b);});
+  render(0);
+})();
+// quality bars
+(function(){
+  var features=[{n:'Hybrid search (dense + sparse)',v:15},{n:'Query expansion (4 variants)',v:10},{n:'Section-aware chunking',v:10},{n:'qwen3-embedding:8b (4096d)',v:8},{n:'LLM re-ranking',v:8},{n:'Compliance-specific prompt',v:5},{n:'Chunk overlap + context prefix',v:6}];
+  var c=document.getElementById('quality-bars');
+  features.forEach(function(f){var pct=Math.round(f.v/15*100);
+    c.innerHTML+='<div class="qbar"><div class="qbar-name">'+f.n+'</div><div class="qbar-track"><div class="qbar-fill" style="width:'+pct+'%"></div></div><div class="qbar-val">+'+f.v+'%</div></div>';});
+  c.innerHTML+='<div style="display:flex;justify-content:flex-end;align-items:baseline;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line2)"><span style="font-size:12px;color:var(--ivory-faint)">Estimated cumulative lift</span><span class="serif" style="font-size:20px;color:var(--champagne)">+25–40%</span></div>';
+})();
+</script>
+</body>
+</html>
